@@ -466,7 +466,7 @@
     <section class="panel section" aria-labelledby="lbHeading">
       <div class="section-title">
         <h2 id="lbHeading">🏆 Liderlik Tablosu</h2>
-        <span class="small">Bugün</span>
+        <span class="small">Bu hafta</span>
       </div>
       <div class="custom-row" id="lbNameRow">
         <input class="field" id="lbNameInput" type="text" maxlength="20" placeholder="İsmini yaz ve katıl">
@@ -625,6 +625,30 @@
         .slice(0, 40) || "kullanici";
     }
 
+    function getWeekStart(date) {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      const day = (d.getDay() + 6) % 7; // Pazartesi = 0
+      d.setDate(d.getDate() - day);
+      return d;
+    }
+
+    function getWeekKey(date = new Date()) {
+      return toDateKey(getWeekStart(date));
+    }
+
+    function weekTotal() {
+      const start = getWeekStart(new Date());
+      const startKey = toDateKey(start);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+      const endKey = toDateKey(end);
+      const totals = totalsByDate();
+      return Object.keys(totals).reduce((sum, key) => {
+        return (key >= startKey && key <= endKey) ? sum + totals[key] : sum;
+      }, 0);
+    }
+
     function updateLbNameUI(editing) {
       if (!leaderboardEnabled) {
         els.lbNameRow.style.display = "none";
@@ -642,12 +666,14 @@
       }
     }
 
-    function syncLeaderboard(amount) {
+    function syncLeaderboard() {
       if (!leaderboardEnabled || !myName) return;
-      lbDb.collection("leaderboard").doc(slugify(myName)).set({
+      const weekKey = getWeekKey();
+      const amount = weekTotal();
+      lbDb.collection("leaderboard").doc(`${slugify(myName)}_${weekKey}`).set({
         name: myName,
         amount,
-        date: todayKey(),
+        weekKey,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }).catch(err => console.error("Leaderboard sync hatası:", err));
     }
@@ -655,7 +681,7 @@
     function renderLeaderboard(rows) {
       els.lbList.innerHTML = "";
       if (!rows.length) {
-        els.lbEmpty.textContent = "Bugün için henüz kimse su eklemedi. İlk sen ol!";
+        els.lbEmpty.textContent = "Bu hafta için henüz kimse su eklemedi. İlk sen ol!";
         return;
       }
       els.lbEmpty.textContent = "";
@@ -689,7 +715,7 @@
     function listenLeaderboard() {
       if (!leaderboardEnabled) return;
       lbDb.collection("leaderboard")
-        .where("date", "==", todayKey())
+        .where("weekKey", "==", getWeekKey())
         .onSnapshot(snapshot => {
           const rows = [];
           snapshot.forEach(doc => rows.push(doc.data()));
@@ -839,7 +865,7 @@
       renderEntries(selectedDate);
       renderHistory(totals);
       renderChart(getChartSeries(), goal);
-      syncLeaderboard(amount);
+      syncLeaderboard();
     }
 
     function renderEntries(key) {
