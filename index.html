@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12b8bd">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HydroLog">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <title>HydroLog</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --turquoise: #12b8bd;
+      --turquoise-dark: #078f96;
+      --turquoise-soft: #ddfbfb;
+      --ink: #123235;
+      --muted: #638084;
+      --line: #cceff0;
+      --white: #ffffff;
+      --danger: #db4a55;
+      --shadow: 0 8px 24px rgba(7, 143, 150, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(180deg, #f4ffff 0%, #ffffff 54%, #f2ffff 100%);
+      color: var(--ink);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    select {
+      font: inherit;
+    }
+
+    .app {
+      width: min(100%, 620px);
+      margin: 0 auto;
+      padding: max(14px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom));
+    }
+
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 6px 2px 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 27px;
+      line-height: 1.12;
+      letter-spacing: 0;
+      font-weight: 700;
+    }
+
+    .date {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .drop {
+      flex: 0 0 auto;
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: var(--turquoise);
+      color: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .drop svg {
+      width: 27px;
+      height: 27px;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 16px;
+    }
+
+    .progress-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .amount {
+      font-size: 38px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .goal {
+      color: var(--muted);
+      font-size: 14px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .bar {
+      height: 16px;
+      background: #e7f8f8;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--turquoise), #38d8cb);
+      transition: width 280ms ease;
+    }
+
+    .status {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      min-height: 48px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--turquoise-soft);
+      color: var(--turquoise-dark);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 140ms ease, background 140ms ease;
+      touch-action: manipulation;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn.primary {
+      background: var(--turquoise);
+      color: var(--white);
+    }
+
+    .btn.danger {
+      background: #fff1f2;
+      color: var(--danger);
+    }
+
+    .section {
+      margin-top: 14px;
+      padding: 14px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .custom-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .field {
+      min-width: 0;
+      height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0 14px;
+      background: var(--white);
+      color: var(--ink);
+      outline-color: var(--turquoise);
+    }
+
+    .goal-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .history-list,
+    .entry-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .history-item,
+    .entry-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f8ffff;
+      color: var(--ink);
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    .history-item {
+      cursor: pointer;
+    }
+
+    .history-item.active {
+      border-color: var(--turquoise);
+      background: var(--turquoise-soft);
+    }
+
+    .item-main {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .item-title {
+      font-weight: 700;
+    }
+
+    .item-note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .item-amount {
+      color: var(--turquoise-dark);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .entry-item {
+      grid-template-columns: 1fr auto auto;
+    }
+
+    .icon-btn {
+      width: 38px;
+      min-height: 38px;
+      border-radius: 11px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      background: #fff1f2;
+      color: var(--danger);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .select-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      padding-top: 4px;
+    }
+
+    .chart {
+      width: 100%;
+      height: 250px;
+      display: block;
+      overflow: visible;
+      shape-rendering: geometricPrecision;
+    }
+
+    .axis {
+      stroke: #acdfe1;
+      stroke-width: 1;
+    }
+
+    .grid-line {
+      stroke: #e5f5f5;
+      stroke-width: 1;
+    }
+
+    .goal-line {
+      stroke: var(--turquoise-dark);
+      stroke-width: 2;
+      stroke-dasharray: 6 7;
+    }
+
+    .bar-mark {
+      fill: var(--turquoise);
+      rx: 7;
+      transition: y 240ms ease, height 240ms ease;
+    }
+
+    .today-mark {
+      fill: #078f96;
+    }
+
+    .chart text {
+      fill: var(--muted);
+      font-size: 11px;
+    }
+
+    .chart .value-label {
+      fill: var(--ink);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 14px 4px 2px;
+      font-size: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 10px;
+      background: #f8ffff;
+      min-width: 0;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 3px;
+    }
+
+    .footer-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 390px) {
+      .app {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .amount {
+        font-size: 34px;
+      }
+
+      .actions,
+      .stats {
+        gap: 8px;
+      }
+
+      .btn {
+        min-height: 46px;
+        border-radius: 12px;
+      }
+
+      .entry-item {
+        grid-template-columns: 1fr auto;
+      }
+
+      .entry-item .icon-btn {
+        grid-column: 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>HydroLog</h1>
+        <div class="date" id="todayText"></div>
+      </div>
+      <div class="drop" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none">
+          <rect width="48" height="48" rx="13" fill="currentColor"/>
+          <path d="M24 10s10.8 11.3 10.8 19.2a10.8 10.8 0 1 1-21.6 0C13.2 21.3 24 10 24 10Z" fill="white"/>
+          <path d="M18.8 30.5c1 3.4 3.5 5.5 7.2 6.2" stroke="#12b8bd" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </header>
+
+    <section class="panel hero" aria-labelledby="todayHeading">
+      <div class="progress-head">
+        <div>
+          <h2 id="todayHeading">Bugün</h2>
+          <div class="amount"><span id="todayAmount">0</span> ml</div>
+        </div>
+        <div class="goal">Hedef<br><strong id="goalText">2500 ml</strong></div>
+      </div>
+      <div class="bar" aria-label="Günlük hedef ilerlemesi">
+        <div class="fill" id="progressFill"></div>
+      </div>
+      <div class="status">
+        <span id="percentText">%0 tamamlandı</span>
+        <span id="remainingText">2500 ml kaldı</span>
+      </div>
+      <div class="actions" aria-label="Su ekleme seçenekleri">
+        <button class="btn primary" type="button" data-add="200">+200 ml</button>
+        <button class="btn primary" type="button" data-add="330">+330 ml</button>
+        <button class="btn primary" type="button" data-add="500">+500 ml</button>
+      </div>
+    </section>
+
+    <section class="panel section" aria-labelledby="lbHeading">
+      <div class="section-title">
+        <h2 id="lbHeading">🏆 Liderlik Tablosu</h2>
+        <span class="small">Bugün</span>
+      </div>
+      <div class="custom-row" id="lbNameRow">
+        <input class="field" id="lbNameInput" type="text" maxlength="20" placeholder="İsmini yaz ve katıl">
+        <button class="btn primary" type="button" id="lbNameSave">Katıl</button>
+      </div>
+      <div class="small" id="lbYouRow" style="display:none;margin-bottom:10px;">
+        Sen: <strong id="lbYouName"></strong> ·
+        <button class="btn" type="button" id="lbNameChange" style="margin-left:6px;padding:4px 10px;min-height:auto;">değiştir</button>
+      </div>
+      <div class="history-list" id="lbList"></div>
+      <div class="empty" id="lbEmpty"></div>
+    </section>
+
+    <section class="panel section" aria-labelledby="addHeading">
+      <div class="section-title">
+        <h2 id="addHeading">Ek Seçenekler</h2>
+        <span class="small">Bardak, şişe veya özel miktar</span>
+      </div>
+      <div class="custom-row">
+        <input class="field" id="customAmount" type="number" inputmode="numeric" min="1" max="5000" placeholder="Özel ml">
+        <button class="btn" type="button" id="addCustom">Ekle</button>
+      </div>
+      <div class="goal-row">
+        <input class="field" id="goalInput" type="number" inputmode="numeric" min="500" max="8000" step="100" aria-label="Günlük hedef ml">
+        <button class="btn" type="button" id="saveGoal">Hedef</button>
+      </div>
+    </section>
+
+    <section class="panel section" aria-labelledby="entriesHeading">
+      <div class="section-title">
+        <h2 id="entriesHeading">Bugünkü Eklemeler</h2>
+        <span class="small" id="entryCountText">0 kayıt</span>
+      </div>
+      <div class="entry-list" id="entryList"></div>
+      <div class="empty" id="entryEmpty"></div>
+    </section>
+
+    <section class="panel section" aria-labelledby="historyHeading">
+      <div class="section-title">
+        <h2 id="historyHeading">Geçmiş Günler</h2>
+        <span class="small" id="historyCountText">0 gün</span>
+      </div>
+      <div class="history-list" id="historyList"></div>
+      <div class="empty" id="historyEmpty"></div>
+    </section>
+
+    <section class="panel section" aria-labelledby="chartHeading">
+      <div class="section-title">
+        <h2 id="chartHeading">Günlük Grafik</h2>
+        <select class="field" id="rangeSelect" aria-label="Grafik aralığı">
+          <option value="7">Son 7 gün</option>
+          <option value="30">Son 1 ay</option>
+          <option value="90">Son 3 ay</option>
+          <option value="180">Son 6 ay</option>
+          <option value="365">Son 1 sene</option>
+        </select>
+      </div>
+      <div class="chart-wrap">
+        <svg class="chart" id="chart" role="img" aria-labelledby="chartTitle chartDesc" viewBox="0 0 360 250" preserveAspectRatio="xMidYMid meet">
+          <title id="chartTitle">Günlük su tüketimi grafiği</title>
+          <desc id="chartDesc">Her çubuk bir günü ve içilen toplam mililitre miktarını gösterir.</desc>
+        </svg>
+      </div>
+      <div class="empty" id="emptyText"></div>
+      <div class="stats">
+        <div class="stat">
+          <b id="avgText">0 ml</b>
+          <span class="small">Günlük ortalama</span>
+        </div>
+        <div class="stat">
+          <b id="bestText">0 ml</b>
+          <span class="small">En yüksek gün</span>
+        </div>
+        <div class="stat">
+          <b id="daysText">0</b>
+          <span class="small">Kayıtlı gün</span>
+        </div>
+      </div>
+      <div class="footer-actions">
+        <button class="btn danger" type="button" id="resetToday">Bugünü sıfırla</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script>
+    // ================= LİDERLİK TABLOSU AYARLARI =================
+    // Firebase konsolundan aldığın bilgileri aşağıya yapıştır.
+    // Kurulum adımları için Claude ile olan sohbetine bak.
+    const firebaseConfig = {
+      apiKey: "BURAYA_YAPISTIR",
+      authDomain: "BURAYA_YAPISTIR",
+      projectId: "BURAYA_YAPISTIR",
+      storageBucket: "BURAYA_YAPISTIR",
+      messagingSenderId: "BURAYA_YAPISTIR",
+      appId: "BURAYA_YAPISTIR"
+    };
+
+    const leaderboardEnabled = firebaseConfig.apiKey !== "BURAYA_YAPISTIR";
+    let lbDb = null;
+    if (leaderboardEnabled) {
+      firebase.initializeApp(firebaseConfig);
+      lbDb = firebase.firestore();
+    }
+    // ================================================================
+
+    const storageKey = "su-takip-v1";
+    const defaultState = { goal: 2500, entries: [] };
+    const formatter = new Intl.DateTimeFormat("tr-TR", { weekday: "long", day: "numeric", month: "long" });
+    const fullFormatter = new Intl.DateTimeFormat("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    const shortFormatter = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit" });
+    const timeFormatter = new Intl.DateTimeFormat("tr-TR", { hour: "2-digit", minute: "2-digit" });
+    let resizeTimer;
+
+    const els = {
+      todayText: document.getElementById("todayText"),
+      todayAmount: document.getElementById("todayAmount"),
+      goalText: document.getElementById("goalText"),
+      progressFill: document.getElementById("progressFill"),
+      percentText: document.getElementById("percentText"),
+      remainingText: document.getElementById("remainingText"),
+      customAmount: document.getElementById("customAmount"),
+      addCustom: document.getElementById("addCustom"),
+      goalInput: document.getElementById("goalInput"),
+      saveGoal: document.getElementById("saveGoal"),
+      entryCountText: document.getElementById("entryCountText"),
+      entryList: document.getElementById("entryList"),
+      entryEmpty: document.getElementById("entryEmpty"),
+      historyCountText: document.getElementById("historyCountText"),
+      historyList: document.getElementById("historyList"),
+      historyEmpty: document.getElementById("historyEmpty"),
+      rangeSelect: document.getElementById("rangeSelect"),
+      chart: document.getElementById("chart"),
+      emptyText: document.getElementById("emptyText"),
+      avgText: document.getElementById("avgText"),
+      bestText: document.getElementById("bestText"),
+      daysText: document.getElementById("daysText"),
+      resetToday: document.getElementById("resetToday"),
+      lbNameRow: document.getElementById("lbNameRow"),
+      lbNameInput: document.getElementById("lbNameInput"),
+      lbNameSave: document.getElementById("lbNameSave"),
+      lbYouRow: document.getElementById("lbYouRow"),
+      lbYouName: document.getElementById("lbYouName"),
+      lbNameChange: document.getElementById("lbNameChange"),
+      lbList: document.getElementById("lbList"),
+      lbEmpty: document.getElementById("lbEmpty")
+    };
+
+    const lbNameKey = "hydrolog-name-v1";
+    let myName = localStorage.getItem(lbNameKey) || "";
+
+    function slugify(name) {
+      return name.trim().toLowerCase()
+        .replace(/[^a-z0-9ğüşöçı]+/gi, "-")
+        .slice(0, 40) || "kullanici";
+    }
+
+    function updateLbNameUI(editing) {
+      if (!leaderboardEnabled) {
+        els.lbNameRow.style.display = "none";
+        els.lbYouRow.style.display = "none";
+        els.lbEmpty.textContent = "Liderlik tablosu için kurulum tamamlanmadı.";
+        return;
+      }
+      if (myName && !editing) {
+        els.lbNameRow.style.display = "none";
+        els.lbYouRow.style.display = "block";
+        els.lbYouName.textContent = myName;
+      } else {
+        els.lbNameRow.style.display = "grid";
+        els.lbYouRow.style.display = "none";
+      }
+    }
+
+    function syncLeaderboard(amount) {
+      if (!leaderboardEnabled || !myName) return;
+      lbDb.collection("leaderboard").doc(slugify(myName)).set({
+        name: myName,
+        amount,
+        date: todayKey(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(err => console.error("Leaderboard sync hatası:", err));
+    }
+
+    function renderLeaderboard(rows) {
+      els.lbList.innerHTML = "";
+      if (!rows.length) {
+        els.lbEmpty.textContent = "Bugün için henüz kimse su eklemedi. İlk sen ol!";
+        return;
+      }
+      els.lbEmpty.textContent = "";
+      const medals = ["🥇", "🥈", "🥉"];
+      rows.forEach((row, index) => {
+        const item = document.createElement("div");
+        item.className = row.name === myName ? "history-item active" : "history-item";
+
+        const main = document.createElement("div");
+        main.className = "item-main";
+
+        const title = document.createElement("div");
+        title.className = "item-title";
+        const prefix = medals[index] || `${index + 1}.`;
+        title.textContent = `${prefix} ${row.name}`;
+
+        const note = document.createElement("div");
+        note.className = "item-note";
+        note.textContent = row.name === myName ? "sen" : "\u00A0";
+
+        const amount = document.createElement("div");
+        amount.className = "item-amount";
+        amount.textContent = `${row.amount} ml`;
+
+        main.append(title, note);
+        item.append(main, amount);
+        els.lbList.appendChild(item);
+      });
+    }
+
+    function listenLeaderboard() {
+      if (!leaderboardEnabled) return;
+      lbDb.collection("leaderboard")
+        .where("date", "==", todayKey())
+        .onSnapshot(snapshot => {
+          const rows = [];
+          snapshot.forEach(doc => rows.push(doc.data()));
+          rows.sort((a, b) => b.amount - a.amount);
+          renderLeaderboard(rows);
+        }, err => {
+          console.error("Leaderboard okuma hatası:", err);
+          els.lbEmpty.textContent = "Liderlik tablosu yüklenemedi.";
+        });
+    }
+
+    let state = loadState();
+    let selectedDate = todayKey();
+
+    function toDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function todayKey() {
+      return toDateKey(new Date());
+    }
+
+    function dateKey(daysAgo) {
+      const date = new Date();
+      date.setDate(date.getDate() - daysAgo);
+      return toDateKey(date);
+    }
+
+    function parseDateKey(key) {
+      const parts = key.split("-").map(Number);
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey)) || {};
+        const entries = Array.isArray(saved.entries) ? saved.entries : migrateRecords(saved.records);
+        return {
+          ...defaultState,
+          ...saved,
+          entries: entries.filter(entry => entry && entry.date && Number(entry.amount) > 0)
+        };
+      } catch {
+        return { ...defaultState, entries: [] };
+      }
+    }
+
+    function migrateRecords(records) {
+      if (!records) return [];
+      return Object.entries(records)
+        .filter(([, amount]) => Number(amount) > 0)
+        .map(([date, amount]) => ({
+          id: `old-${date}`,
+          date,
+          amount: Math.round(Number(amount)),
+          createdAt: `${date}T12:00:00`,
+          note: "Eski toplam kayıt"
+        }));
+    }
+
+    function saveState() {
+      const cleanState = { goal: state.goal, entries: state.entries };
+      localStorage.setItem(storageKey, JSON.stringify(cleanState));
+    }
+
+    function addWater(amount) {
+      const value = Math.max(0, Math.round(Number(amount) || 0));
+      if (!value) return;
+      const now = new Date();
+      state.entries.push({
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        date: todayKey(),
+        amount: value,
+        createdAt: now.toISOString()
+      });
+      selectedDate = todayKey();
+      saveState();
+      render();
+    }
+
+    function deleteEntry(id) {
+      state.entries = state.entries.filter(entry => entry.id !== id);
+      saveState();
+      render();
+    }
+
+    function resetToday() {
+      const key = todayKey();
+      state.entries = state.entries.filter(entry => entry.date !== key);
+      selectedDate = key;
+      saveState();
+      render();
+    }
+
+    function totalsByDate() {
+      return state.entries.reduce((map, entry) => {
+        map[entry.date] = (map[entry.date] || 0) + Number(entry.amount);
+        return map;
+      }, {});
+    }
+
+    function allRecordedSeries() {
+      const totals = totalsByDate();
+      return Object.keys(totals)
+        .sort()
+        .map(key => ({ key, date: parseDateKey(key), amount: totals[key] }));
+    }
+
+    function getChartSeries() {
+      const days = Number(els.rangeSelect.value) || 7;
+      const series = [];
+      const totals = totalsByDate();
+      for (let i = days - 1; i >= 0; i -= 1) {
+        const key = dateKey(i);
+        series.push({ key, date: parseDateKey(key), amount: totals[key] || 0 });
+      }
+      return series;
+    }
+
+    function entriesForDate(key) {
+      return state.entries
+        .filter(entry => entry.date === key)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    function render() {
+      const key = todayKey();
+      const totals = totalsByDate();
+      const amount = totals[key] || 0;
+      const goal = Math.max(500, Number(state.goal) || defaultState.goal);
+      const percent = Math.min(100, Math.round((amount / goal) * 100));
+      const remaining = Math.max(0, goal - amount);
+
+      if (!selectedDate) selectedDate = key;
+
+      els.todayText.textContent = formatter.format(new Date());
+      els.todayAmount.textContent = amount;
+      els.goalText.textContent = `${goal} ml`;
+      els.goalInput.value = goal;
+      els.progressFill.style.width = `${Math.min(100, (amount / goal) * 100)}%`;
+      els.percentText.textContent = `%${percent} tamamlandı`;
+      els.remainingText.textContent = remaining ? `${remaining} ml kaldı` : "Hedef tamamlandı";
+
+      renderEntries(selectedDate);
+      renderHistory(totals);
+      renderChart(getChartSeries(), goal);
+      syncLeaderboard(amount);
+    }
+
+    function renderEntries(key) {
+      const entries = entriesForDate(key);
+      const total = entries.reduce((sum, entry) => sum + Number(entry.amount), 0);
+      const label = key === todayKey() ? "Bugünkü Eklemeler" : fullFormatter.format(parseDateKey(key));
+      document.getElementById("entriesHeading").textContent = label;
+      els.entryCountText.textContent = `${entries.length} kayıt - ${total} ml`;
+      els.entryList.innerHTML = "";
+      els.entryEmpty.textContent = entries.length ? "" : "Bu gün için ekleme yok.";
+
+      entries.forEach(entry => {
+        const row = document.createElement("div");
+        row.className = "entry-item";
+
+        const main = document.createElement("div");
+        main.className = "item-main";
+
+        const title = document.createElement("div");
+        title.className = "item-title";
+        title.textContent = entry.note || timeFormatter.format(new Date(entry.createdAt));
+
+        const note = document.createElement("div");
+        note.className = "item-note";
+        note.textContent = entry.note ? fullFormatter.format(parseDateKey(entry.date)) : "Eklenme saati";
+
+        const amount = document.createElement("div");
+        amount.className = "item-amount";
+        amount.textContent = `${entry.amount} ml`;
+
+        const remove = document.createElement("button");
+        remove.className = "btn icon-btn";
+        remove.type = "button";
+        remove.setAttribute("aria-label", `${entry.amount} ml kaydını sil`);
+        remove.textContent = "x";
+        remove.addEventListener("click", () => deleteEntry(entry.id));
+
+        main.append(title, note);
+        row.append(main, amount, remove);
+        els.entryList.appendChild(row);
+      });
+    }
+
+    function renderHistory(totals) {
+      const series = allRecordedSeries().reverse();
+      els.historyCountText.textContent = `${series.length} gün`;
+      els.historyList.innerHTML = "";
+      els.historyEmpty.textContent = series.length ? "" : "Henüz geçmiş kayıt yok.";
+
+      series.forEach(item => {
+        const button = document.createElement("button");
+        button.className = item.key === selectedDate ? "history-item active" : "history-item";
+        button.type = "button";
+        button.addEventListener("click", () => {
+          selectedDate = item.key;
+          render();
+        });
+
+        const main = document.createElement("div");
+        main.className = "item-main";
+
+        const title = document.createElement("div");
+        title.className = "item-title";
+        title.textContent = item.key === todayKey() ? "Bugün" : fullFormatter.format(item.date);
+
+        const note = document.createElement("div");
+        note.className = "item-note";
+        note.textContent = `${entriesForDate(item.key).length} ekleme`;
+
+        const amount = document.createElement("div");
+        amount.className = "item-amount";
+        amount.textContent = `${totals[item.key] || 0} ml`;
+
+        main.append(title, note);
+        button.append(main, amount);
+        els.historyList.appendChild(button);
+      });
+    }
+
+    function renderChart(series, goal) {
+      const measuredWidth = Math.round(els.chart.getBoundingClientRect().width || 360);
+      const width = Math.max(320, measuredWidth);
+      const height = 250;
+      els.chart.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+      const margin = { top: 22, right: 12, bottom: 42, left: 42 };
+      const plotWidth = width - margin.left - margin.right;
+      const plotHeight = height - margin.top - margin.bottom;
+      const safeSeries = series.length ? series : [{ key: todayKey(), date: new Date(), amount: 0 }];
+      const maxAmount = Math.max(goal, ...safeSeries.map(item => item.amount), 1000);
+      const roundedMax = Math.ceil(maxAmount / 500) * 500;
+      const barGap = safeSeries.length > 120 ? 1 : safeSeries.length > 45 ? 2 : 6;
+      const barWidth = Math.max(2, (plotWidth - barGap * (safeSeries.length - 1)) / safeSeries.length);
+      const today = todayKey();
+
+      els.chart.innerHTML = `
+        <title id="chartTitle">Günlük su tüketimi grafiği</title>
+        <desc id="chartDesc">Her çubuk bir günü ve içilen toplam mililitre miktarını gösterir.</desc>
+      `;
+
+      const add = (name, attrs, text) => {
+        const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+        Object.entries(attrs).forEach(([attr, value]) => node.setAttribute(attr, value));
+        if (text !== undefined) node.textContent = text;
+        els.chart.appendChild(node);
+        return node;
+      };
+
+      [0, 0.5, 1].forEach(fraction => {
+        const y = margin.top + plotHeight - plotHeight * fraction;
+        add("line", { class: "grid-line", x1: margin.left, x2: width - margin.right, y1: y, y2: y });
+        add("text", { x: 4, y: y + 4 }, `${Math.round((roundedMax * fraction) / 1000)}L`);
+      });
+
+      const goalY = margin.top + plotHeight - (goal / roundedMax) * plotHeight;
+      add("line", { class: "goal-line", x1: margin.left, x2: width - margin.right, y1: goalY, y2: goalY });
+      add("text", { x: width - 70, y: Math.max(12, goalY - 6) }, "hedef");
+      add("line", { class: "axis", x1: margin.left, x2: width - margin.right, y1: margin.top + plotHeight, y2: margin.top + plotHeight });
+
+      const maxLabels = width < 390 ? 5 : 7;
+      const labelStep = Math.max(1, Math.ceil(safeSeries.length / maxLabels));
+      safeSeries.forEach((item, index) => {
+        const x = margin.left + index * (barWidth + barGap);
+        const barHeight = item.amount ? Math.max(3, (item.amount / roundedMax) * plotHeight) : 0;
+        const y = margin.top + plotHeight - barHeight;
+        const label = shortFormatter.format(item.date).replace(".", "/").replace(".", "");
+
+        add("rect", {
+          class: item.key === today ? "bar-mark today-mark" : "bar-mark",
+          x: x.toFixed(2),
+          y: y.toFixed(2),
+          width: barWidth.toFixed(2),
+          height: barHeight.toFixed(2)
+        });
+
+        if (item.amount > 0 && (item.key === today || item.amount >= goal || safeSeries.length <= 8)) {
+          add("text", {
+            class: "value-label",
+            x: (x + barWidth / 2).toFixed(2),
+            y: Math.max(12, y - 6).toFixed(2),
+            "text-anchor": "middle"
+          }, `${Math.round(item.amount / 100) / 10}L`);
+        }
+
+        if (index % labelStep === 0 || index === safeSeries.length - 1) {
+          add("text", {
+            x: (x + barWidth / 2).toFixed(2),
+            y: height - 13,
+            "text-anchor": "middle"
+          }, item.key === today ? "bugün" : label);
+        }
+      });
+
+      const recorded = series.filter(item => item.amount > 0);
+      const total = recorded.reduce((sum, item) => sum + item.amount, 0);
+      const best = recorded.reduce((max, item) => Math.max(max, item.amount), 0);
+      els.emptyText.textContent = recorded.length ? "" : "İlk su miktarını eklediğinde günlük grafik dolmaya başlayacak.";
+      els.avgText.textContent = `${recorded.length ? Math.round(total / recorded.length) : 0} ml`;
+      els.bestText.textContent = `${best} ml`;
+      els.daysText.textContent = `${recorded.length}`;
+    }
+
+    document.querySelectorAll("[data-add]").forEach(button => {
+      button.addEventListener("click", () => addWater(button.dataset.add));
+    });
+
+    els.addCustom.addEventListener("click", () => {
+      addWater(els.customAmount.value);
+      els.customAmount.value = "";
+    });
+
+    els.customAmount.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        addWater(els.customAmount.value);
+        els.customAmount.value = "";
+      }
+    });
+
+    els.saveGoal.addEventListener("click", () => {
+      const nextGoal = Math.max(500, Math.min(8000, Math.round(Number(els.goalInput.value) || defaultState.goal)));
+      state.goal = nextGoal;
+      saveState();
+      render();
+    });
+
+    els.rangeSelect.addEventListener("change", render);
+    els.resetToday.addEventListener("click", resetToday);
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(render, 120);
+    });
+
+    els.lbNameSave.addEventListener("click", () => {
+      const val = (els.lbNameInput.value || "").trim();
+      if (!val) return;
+      myName = val.slice(0, 20);
+      localStorage.setItem(lbNameKey, myName);
+      updateLbNameUI(false);
+      render();
+    });
+
+    els.lbNameInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") els.lbNameSave.click();
+    });
+
+    els.lbNameChange.addEventListener("click", () => {
+      els.lbNameInput.value = myName;
+      updateLbNameUI(true);
+    });
+
+    updateLbNameUI(false);
+    listenLeaderboard();
+
+    saveState();
+    render();
+  </script>
+</body>
+</html>
